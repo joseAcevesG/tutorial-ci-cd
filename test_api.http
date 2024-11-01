@@ -1,0 +1,74 @@
+@base_url = http://localhost:3000
+# @base_url = http://54.196.0.35
+
+
+### post tareas ####
+POST {{base_url}}/tareas
+Content-Type: multipart/form-data; boundary=mi-boundary
+
+--mi-boundary
+Content-Disposition: form-data; name="files"; filename="vader.jpg"
+Content-Type: image/jpeg
+
+< ./vader.jpg
+--mi-boundary
+Content-Disposition: form-data; name="title"
+
+title of the task
+--mi-boundary
+Content-Disposition: form-data; name="description"
+
+description of the task
+--mi-boundary
+Content-Disposition: form-data; name="todoDate"
+
+2021-09-30
+--mi-boundary--
+
+### put tareas ####
+PUT {{base_url}}/tareas/f0d10c68-040f-4a9b-9596-62cde3bfc673
+Content-Type: multipart/form-data; boundary=mi-boundary
+
+--mi-boundary
+Content-Disposition: form-data; name="files"; filename="vader.jpg"
+Content-Type: image/jpeg
+
+< ./vader.jpg
+--mi-boundary
+Content-Disposition: form-data; name="files"; filename="vader2.jpg"
+Content-Type: image/jpeg
+
+< ./vader.jpg
+--mi-boundary
+Content-Disposition: form-data; name="files"; filename="vader3.jpg"
+Content-Type: image/jpeg
+
+< ./vader.jpg
+--mi-boundary
+Content-Disposition: form-data; name="title"
+
+title of the task2
+--mi-boundary
+Content-Disposition: form-data; name="description"
+
+description of the task2
+--mi-boundary
+Content-Disposition: form-data; name="todoDate"
+
+2024-09-30
+--mi-boundary--
+
+### get tareas ####
+GET {{base_url}}/tareas
+
+### get tareas by id ####
+GET {{base_url}}/tareas/f0d10c68-040f-4a9b-9596-62cde3bfc673
+
+### get archivos by id ####
+GET {{base_url}}/tareas/f0d10c68-040f-4a9b-9596-62cde3bfc673/archivos
+
+### get archivo by id ####
+GET {{base_url}}/tareas/dbd8b722-d938-437e-a7d7-4c4d39b1bb07/archivos/vader.jpg
+
+### delete tareas by id ####
+DELETE {{base_url}}/tareas/3f72da8f-316c-4e59-9d4b-5b3f8491d610
