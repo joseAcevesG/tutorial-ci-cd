@@ -1,5 +1,5 @@
 @base_url = http://localhost:3000
-# @base_url = http://54.196.0.35
+# @base_url = http://54.198.124.216:8080
 
 
 ### post tareas ####
