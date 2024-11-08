@@ -26,7 +26,7 @@ jobs:
         run: npm run build
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: app
           path: .
@@ -44,13 +44,6 @@ jobs:
           name: app
           path: .
 
-      - name: Set VERSION_TAG and DOCKER_IMAGE
-        run: |
-          VERSION_TAG="1.0.${{ github.run_id }}-${{ github.ref_name }}"
-          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
-          DOCKER_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${VERSION_TAG}"
-          echo "DOCKER_IMAGE=${DOCKER_IMAGE}" >> $GITHUB_ENV
-
       - name: Log in to Amazon ECR
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -64,21 +57,23 @@ jobs:
 
       - name: Tag and push Docker image
         run: |
-          docker tag my-app-image:latest $DOCKER_IMAGE
-          docker push $DOCKER_IMAGE
+          docker tag my-app-image:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
 
   deploy:
     needs: docker
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
+    env:
+      PORT: ${{ vars.PORT }}
+      AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+      DYNAMODB_TABLE_NAME: ${{ vars.DYNAMODB_TABLE_NAME }}
+      SNS_TOPIC_ARN: ${{ vars.SNS_TOPIC_ARN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
     steps:
-      - name: Set VERSION_TAG and DOCKER_IMAGE
-        run: |
-          VERSION_TAG="1.0.${{ github.run_id }}-${{ github.ref_name }}"
-          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
-          DOCKER_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${VERSION_TAG}"
-          echo "DOCKER_IMAGE=${DOCKER_IMAGE}" >> $GITHUB_ENV
-
       - name: Create temporary SSH key
         run: echo "${{ secrets.EC2_KEY }}" > /tmp/ssh_key.pem
 
@@ -89,8 +84,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_DEV }} << 'EOF'
             $(aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com)
-            docker pull $DOCKER_IMAGE
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
             docker stop demo-twelve || true
             docker container rm -f demo-twelve || true
-            docker run -d --name demo-twelve -p 8080:8080 $DOCKER_IMAGE
+            docker run -d --name demo-twelve -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
           EOF
