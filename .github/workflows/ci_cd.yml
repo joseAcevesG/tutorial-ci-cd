@@ -34,6 +34,7 @@ jobs:
   docker:
     needs: build
     runs-on: ubuntu-latest
+    environment: Dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -63,6 +64,7 @@ jobs:
   deploy:
     # Esta configuración hace que deploy solo se ejecute manualmente
     runs-on: ubuntu-latest
+    environment: Dev
     needs: docker
     env:
       AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
