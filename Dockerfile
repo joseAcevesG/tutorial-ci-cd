@@ -1,5 +1,5 @@
-# Usa una imagen de Node.js
-FROM node:18
+# Usa una imagen de Node.js 20
+FROM node:20
 
 # Configura el directorio de trabajo
 WORKDIR /app
@@ -16,8 +16,9 @@ COPY . .
 # Construye la aplicación (ajusta el comando si tu proyecto usa otro comando de build)
 RUN npm run build
 
-# Expone el puerto (ajusta al puerto de tu aplicación si es diferente)
-EXPOSE 3000
+# Expone el puerto 8080 para uso interno y externo
+EXPOSE 8080
 
-# Define el comando para iniciar la aplicación
+# Define el comando para iniciar la aplicación y especifica el puerto 8080
+ENV PORT=8080
 CMD ["npm", "start"]
