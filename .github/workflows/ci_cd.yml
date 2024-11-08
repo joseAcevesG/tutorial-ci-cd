@@ -90,5 +90,14 @@ jobs:
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
             docker stop demo-twelve || true
             docker container rm -f demo-twelve || true
-            docker run -d --name demo-twelve -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
+            docker run -d --name demo-twelve -p 8080:8080 \
+              -e PORT=${{ vars.PORT }} \
+              -e AWS_REGION=${{ secrets.AWS_DEFAULT_REGION }} \
+              -e S3_BUCKET_NAME=${{ vars.S3_BUCKET_NAME }} \
+              -e DYNAMODB_TABLE_NAME=${{ vars.DYNAMODB_TABLE_NAME }} \
+              -e SNS_TOPIC_ARN=${{ vars.SNS_TOPIC_ARN }} \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }} \
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
           EOF
