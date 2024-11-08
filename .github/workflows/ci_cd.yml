@@ -5,7 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
+  workflow_dispatch: # Este permite ejecución manual
 
 jobs:
   build:
@@ -61,9 +61,9 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ github.run_id }}
 
   deploy:
-    needs: docker
+    # Esta configuración hace que deploy solo se ejecute manualmente
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    needs: docker
     env:
       PORT: ${{ vars.PORT }}
       AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
